@@ -52,7 +52,7 @@ namespace FreeSql.Internal.ObjectPool
 
         private List<Object<T>> _allObjects = new List<Object<T>>();
         private object _allObjectsLock = new object();
-        private ConcurrentStack<Object<T>> _freeObjects = new ConcurrentStack<Object<T>>();
+        private ConcurrentQueue<Object<T>> _freeObjects = new ConcurrentQueue<Object<T>>();
 
         private ConcurrentQueue<GetSyncQueueInfo> _getSyncQueue = new ConcurrentQueue<GetSyncQueueInfo>();
         private ConcurrentQueue<TaskCompletionSource<Object<T>>> _getAsyncQueue = new ConcurrentQueue<TaskCompletionSource<Object<T>>>();
@@ -254,7 +254,7 @@ namespace FreeSql.Internal.ObjectPool
             if (checkAvailable && UnavailableException != null)
                 throw new Exception(CoreStrings.Policy_Status_NotAvailable(Policy.Name,UnavailableException?.Message), UnavailableException);
 
-            if ((_freeObjects.TryPop(out var obj) == false || obj == null) && _allObjects.Count < Policy.PoolSize)
+            if ((_freeObjects.TryDequeue(out var obj) == false || obj == null) && _allObjects.Count < Policy.PoolSize)
             {
                 lock (_allObjectsLock)
                     if (_allObjects.Count < Policy.PoolSize)
@@ -457,7 +457,7 @@ namespace FreeSql.Internal.ObjectPool
                     obj.LastReturnTime = DateTime.Now;
                     obj._isReturned = true;
 
-                    _freeObjects.Push(obj);
+                    _freeObjects.Enqueue(obj);
                 }
             }
         }
@@ -466,7 +466,7 @@ namespace FreeSql.Internal.ObjectPool
         {
             running = false;
 
-            while (_freeObjects.TryPop(out var fo)) ;
+            while (_freeObjects.TryDequeue(out var fo)) ;
             while (_getSyncQueue.TryDequeue(out var sync))
             {
                 try { sync.Wait.Set(); } catch { }

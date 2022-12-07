@@ -145,9 +145,9 @@ public static class FreeSqlExtensionsLinqSql
     /// <summary>
     /// 【linq to sql】专用扩展方法，不建议直接使用
     /// </summary>
-    public static ISelect<T1> ThenBy<T1, TMember>(this ISelect<T1> that, Expression<Func<T1, TMember>> column) where T1 : class => that.OrderBy(column);
+    public static ISelect<T1> ThenBy<T1, TMember>(this ISelect<T1> that, Expression<Func<T1, TMember>> column) => that.OrderBy(column);
     /// <summary>
     /// 【linq to sql】专用扩展方法，不建议直接使用
     /// </summary>
-    public static ISelect<T1> ThenByDescending<T1, TMember>(this ISelect<T1> that, Expression<Func<T1, TMember>> column) where T1 : class => that.OrderByDescending(column);
+    public static ISelect<T1> ThenByDescending<T1, TMember>(this ISelect<T1> that, Expression<Func<T1, TMember>> column) => that.OrderByDescending(column);
 }
